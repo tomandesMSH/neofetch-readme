@@ -36,8 +36,15 @@
     align-items: center;
     justify-content: center;
   }
+  .preview-box { position: relative; }
   .preview-box img { display: block; width: 100%; height: auto; }
-  .preview-box .empty { color: var(--dim); font-size: 13px; padding: 40px; }
+  .preview-box img[src=""], .preview-box img:not([src]) { display: none; }
+  .preview-box .empty {
+    color: var(--dim); font-size: 13px; padding: 40px;
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    transition: opacity .15s ease;
+  }
+  .preview-box .empty[hidden] { display: none; }
   fieldset {
     border: 1px solid var(--border);
     border-radius: 10px;
@@ -114,7 +121,10 @@
   stored - every value lives in the URL, same idea as
   <a href="https://readme-typing-svg.demolab.com" target="_blank" rel="noopener">readme-typing-svg</a>.</p>
 
-  <div class="preview-box"><img id="preview" alt="live preview"></div>
+  <div class="preview-box">
+    <img id="preview" alt="live preview">
+    <span id="preview_loading" class="empty">Loading preview…</span>
+  </div>
 
   <fieldset>
     <legend>Identity</legend>
@@ -248,16 +258,39 @@ function buildQuery() {
 }
 
 let debounceTimer = null;
+let requestSeq = 0;
+const previewEl = document.getElementById("preview");
+const loadingEl = document.getElementById("preview_loading");
+
 function update() {
   clearTimeout(debounceTimer);
+  // The card is a ~1MB SVG (embedded font + logo frames), so decoding
+  // takes a couple seconds. Wait for typing to settle before even
+  // starting a fetch, so we're not aborting/restarting it every
+  // keystroke (which previously made the preview look permanently
+  // stuck/broken while editing).
   debounceTimer = setTimeout(() => {
     const params = buildQuery();
     const url = `${location.origin}/api/svg?${params.toString()}`;
-    document.getElementById("preview").src = url;
     document.getElementById("out_url").value = url;
     const user = document.getElementById("f_user").value.trim() || "github";
     document.getElementById("out_md").value = `<img src="${url}" width="100%" alt="${user} neofetch profile card" />`;
-  }, 250);
+
+    const seq = ++requestSeq;
+    loadingEl.hidden = false;
+    loadingEl.textContent = "Loading preview…";
+    const preloader = new Image();
+    preloader.onload = () => {
+      if (seq !== requestSeq) return; // a newer edit superseded this one
+      previewEl.src = url;
+      loadingEl.hidden = true;
+    };
+    preloader.onerror = () => {
+      if (seq !== requestSeq) return;
+      loadingEl.textContent = "Couldn't load preview - check the server/console.";
+    };
+    preloader.src = url;
+  }, 600);
 }
 
 document.querySelectorAll("input").forEach((el) => {
