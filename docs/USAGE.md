@@ -67,7 +67,7 @@ javascript, typescript, react, vuedotjs, angular, svelte, nodedotjs, php,
 python, openjdk, kotlin, swift, go, rust, cplusplus, html5, css3,
 tailwindcss, docker, kubernetes, git, github, linux, apple, postgresql,
 mysql, mongodb, redis, graphql, amazonwebservices, googlecloud, vercel,
-dotnet
+dotnet, lua, bootstrap, blender
 ```
 
 To add a new icon: add its Simple Icons slug/title/hex to `ICON_CATALOG`

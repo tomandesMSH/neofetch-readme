@@ -102,6 +102,9 @@ ICON_CATALOG: dict[str, tuple[str, str]] = {
     "googlecloud": ("Google Cloud", "4285F4"),
     "vercel": ("Vercel", "000000"),
     "dotnet": (".NET", "512BD4"),
+    "lua": ("Lua", "2C2D72"),
+    "bootstrap": ("Bootstrap", "7952B3"),
+    "blender": ("Blender", "E87D0D"),
 }
 
 DEFAULT_ICONS = [
