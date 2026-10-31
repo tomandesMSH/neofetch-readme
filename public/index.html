@@ -129,6 +129,15 @@
   </div>
 
   <fieldset>
+    <legend>Editing an existing card?</legend>
+    <div class="row" style="gap:8px; flex-wrap:nowrap">
+      <input type="text" id="f_loadurl" placeholder="Paste an existing card URL or markdown tag here" style="flex:1">
+      <button id="load_btn" style="margin-top:0; white-space:nowrap">Load into form</button>
+    </div>
+    <p class="muted" id="load_status">Pulls every field below out of the link so you don't have to redo it from scratch.</p>
+  </fieldset>
+
+  <fieldset>
     <legend>Identity</legend>
     <div class="grid">
       <div><label for="f_user">GitHub username</label><input type="text" id="f_user" placeholder="octocat"></div>
@@ -235,6 +244,63 @@ function renderIconGrid() {
 }
 renderIconGrid();
 
+function extractQueryString(raw) {
+  let s = raw.trim();
+  // Accept a pasted <img src="..."> / markdown tag, not just a bare URL.
+  const srcMatch = s.match(/src=["']([^"']+)["']/);
+  if (srcMatch) s = srcMatch[1];
+  const qIdx = s.indexOf("?");
+  return qIdx !== -1 ? s.slice(qIdx + 1) : s;
+}
+
+const HEX_RE = /^#?[0-9a-fA-F]{6}$/;
+function setColorField(id, params, param, fallback) {
+  const v = params.get(param);
+  document.getElementById(id).value = v && HEX_RE.test(v) ? (v.startsWith("#") ? v : `#${v}`) : fallback;
+}
+
+function loadFromUrl() {
+  const raw = document.getElementById("f_loadurl").value;
+  const statusEl = document.getElementById("load_status");
+  if (!raw.trim()) return;
+
+  const params = new URLSearchParams(extractQueryString(raw));
+  if (![...params.keys()].length) {
+    statusEl.textContent = "Didn't find any recognizable parameters in that - paste the full card URL or its <img> tag.";
+    return;
+  }
+
+  document.getElementById("f_user").value = params.get("user") || "";
+  document.getElementById("f_host").value = params.get("host") || "";
+  for (const [key] of LINE_FIELDS) {
+    document.getElementById(`f_${key}`).value = params.get(key) || "";
+  }
+
+  const iconsParam = params.get("icons");
+  const knownSlugs = new Set(ICONS.map(([slug]) => slug));
+  selectedIcons = iconsParam
+    ? iconsParam.split(",").map((s) => s.trim()).filter((s) => knownSlugs.has(s)).slice(0, 12)
+    : [...DEFAULT_ICONS];
+  renderIconGrid();
+
+  setColorField("f_bg", params, "bg", "#0d0d11");
+  setColorField("f_border", params, "border", "#2a2a33");
+  setColorField("f_accent", params, "accent", "#7dd3fc");
+  setColorField("f_text", params, "text", "#e4e4e7");
+
+  const speed = parseFloat(params.get("speed"));
+  document.getElementById("f_speed").value = Number.isFinite(speed) ? speed : 3;
+  document.getElementById("f_cursor").checked = params.get("cursor") !== "off";
+
+  statusEl.textContent = "Loaded - keep editing below, or paste another link to start over.";
+  update();
+}
+
+document.getElementById("load_btn").addEventListener("click", loadFromUrl);
+document.getElementById("f_loadurl").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") { e.preventDefault(); loadFromUrl(); }
+});
+
 function buildQuery() {
   const params = new URLSearchParams();
   const user = document.getElementById("f_user").value.trim();
@@ -297,6 +363,7 @@ function update() {
 }
 
 document.querySelectorAll("input").forEach((el) => {
+  if (el.id === "f_loadurl") return; // has its own handler, shouldn't trigger a live preview refresh
   el.addEventListener("input", update);
   el.addEventListener("change", update);
 });
