@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neofetch README Card Generator</title>
+<style>
+  :root {
+    --bg: #0d0d11;
+    --panel: #15151b;
+    --border: #2a2a33;
+    --text: #e4e4e7;
+    --dim: #9a9aa5;
+    --accent: #7dd3fc;
+    font-family: ui-monospace, "JetBrains Mono", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    padding: 32px 20px 80px;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  p.lede { color: var(--dim); margin: 0 0 28px; font-size: 14px; line-height: 1.5; }
+  p.lede code { color: var(--accent); }
+  .preview-box {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 24px;
+    background: #000;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .preview-box img { display: block; width: 100%; height: auto; }
+  .preview-box .empty { color: var(--dim); font-size: 13px; padding: 40px; }
+  fieldset {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px 18px;
+    margin: 0 0 18px;
+  }
+  legend { padding: 0 8px; color: var(--accent); font-size: 13px; letter-spacing: .04em; text-transform: uppercase; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+  label { display: block; font-size: 11px; color: var(--dim); margin-bottom: 4px; }
+  input[type=text], input[type=email], input[type=number] {
+    width: 100%;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 7px 9px;
+    font: inherit;
+    font-size: 13px;
+  }
+  input[type=color] {
+    width: 44px; height: 30px; padding: 0; border: 1px solid var(--border);
+    border-radius: 6px; background: var(--panel); cursor: pointer;
+  }
+  .color-row { display: flex; align-items: center; gap: 8px; }
+  .color-row span { font-size: 12px; color: var(--dim); width: 56px; }
+  .icon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: 8px;
+  }
+  .icon-chip {
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 8px 6px;
+    font-size: 11px;
+    cursor: pointer;
+    text-align: center;
+    position: relative;
+    user-select: none;
+  }
+  .icon-chip.active { border-color: var(--accent); background: #10202a; color: var(--accent); }
+  .icon-chip .n {
+    position: absolute; top: -6px; right: -6px;
+    background: var(--accent); color: #042; font-weight: 700;
+    border-radius: 50%; width: 18px; height: 18px;
+    display: flex; align-items: center; justify-content: center; font-size: 10px;
+  }
+  .row { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+  .row label.inline { margin: 0; display: flex; align-items: center; gap: 6px; font-size: 12px; }
+  output-box { display: block; }
+  textarea {
+    width: 100%; min-height: 64px; background: var(--panel); color: var(--accent);
+    border: 1px solid var(--border); border-radius: 8px; padding: 10px; font: inherit;
+    font-size: 12px; resize: vertical;
+  }
+  button {
+    background: var(--accent); color: #04121a; border: none; border-radius: 6px;
+    padding: 8px 14px; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer;
+    margin-top: 8px;
+  }
+  button:active { transform: translateY(1px); }
+  .muted { color: var(--dim); font-size: 11px; margin-top: 6px; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Neofetch README Card Generator</h1>
+  <p class="lede">Fill in what you want shown, pick your logos, then copy the
+  <code>&lt;img&gt;</code> tag into your GitHub profile README
+  (<code>&lt;your-username&gt;/&lt;your-username&gt;</code>). Nothing here is
+  stored - every value lives in the URL, same idea as
+  <a href="https://readme-typing-svg.demolab.com" target="_blank" rel="noopener">readme-typing-svg</a>.</p>
+
+  <div class="preview-box"><img id="preview" alt="live preview"></div>
+
+  <fieldset>
+    <legend>Identity</legend>
+    <div class="grid">
+      <div><label for="f_user">GitHub username</label><input type="text" id="f_user" placeholder="octocat"></div>
+      <div><label for="f_host">Host label</label><input type="text" id="f_host" placeholder="github"></div>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Info lines (leave blank to hide)</legend>
+    <div class="grid" id="lineFields"></div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Logos (click to select, in animation order)</legend>
+    <div class="icon-grid" id="iconGrid"></div>
+    <p class="muted">Up to 12. Click a selected logo again to remove it.</p>
+  </fieldset>
+
+  <fieldset>
+    <legend>Appearance</legend>
+    <div class="row">
+      <div class="color-row"><span>Background</span><input type="color" id="f_bg" value="#0d0d11"></div>
+      <div class="color-row"><span>Border</span><input type="color" id="f_border" value="#2a2a33"></div>
+      <div class="color-row"><span>Accent</span><input type="color" id="f_accent" value="#7dd3fc"></div>
+      <div class="color-row"><span>Text</span><input type="color" id="f_text" value="#e4e4e7"></div>
+      <div>
+        <label for="f_speed">Hold speed (s)</label>
+        <input type="number" id="f_speed" min="1" max="8" step="0.5" value="3" style="width:70px">
+      </div>
+      <label class="inline"><input type="checkbox" id="f_cursor" checked> blinking cursor</label>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Result</legend>
+    <label>Markdown (paste into your README)</label>
+    <textarea id="out_md" readonly></textarea>
+    <button id="copy_md">Copy markdown</button>
+    <label style="margin-top:14px">Raw URL</label>
+    <textarea id="out_url" readonly style="min-height:40px"></textarea>
+    <button id="copy_url">Copy URL</button>
+  </fieldset>
+</div>
+
+<script>
+// Keep in sync with lib/params.js LINE_FIELDS and tools/neofetch_anim.py ICON_CATALOG.
+const LINE_FIELDS = [
+  ["os","OS"], ["school","School"], ["city","City"], ["frontend","Frontend"],
+  ["backend","Backend"], ["web","Web"], ["ai","AI"], ["mobile","Mobile"],
+  ["database","Database"], ["cloud","Cloud"], ["devops","DevOps"],
+  ["editor","Editor"], ["shell","Shell"], ["terminal","Terminal"],
+  ["languages","Languages"], ["projects","Projects"], ["mail","Mail"],
+  ["github","GitHub"], ["linkedin","LinkedIn"], ["website","Website"],
+  ["status","Status"], ["hobby","Hobby"],
+];
+const ICONS = [
+  ["javascript","JavaScript"], ["typescript","TypeScript"], ["react","React"],
+  ["vuedotjs","Vue.js"], ["angular","Angular"], ["svelte","Svelte"],
+  ["nodedotjs","Node.js"], ["php","PHP"], ["python","Python"],
+  ["openjdk","Java"], ["kotlin","Kotlin"], ["swift","Swift"],
+  ["go","Go"], ["rust","Rust"], ["cplusplus","C++"], ["html5","HTML5"],
+  ["css3","CSS3"], ["tailwindcss","Tailwind"], ["docker","Docker"],
+  ["kubernetes","Kubernetes"], ["git","Git"], ["github","GitHub"],
+  ["linux","Linux"], ["apple","Apple"], ["postgresql","PostgreSQL"],
+  ["mysql","MySQL"], ["mongodb","MongoDB"], ["redis","Redis"],
+  ["graphql","GraphQL"], ["amazonwebservices","AWS"], ["googlecloud","GCloud"],
+  ["vercel","Vercel"], ["dotnet",".NET"],
+];
+const DEFAULT_ICONS = ["javascript","typescript","react","nodedotjs","php","python","git","linux"];
+
+let selectedIcons = [...DEFAULT_ICONS];
+
+const lineFieldsEl = document.getElementById("lineFields");
+for (const [key, label] of LINE_FIELDS) {
+  const div = document.createElement("div");
+  div.innerHTML = `<label for="f_${key}">${label}</label><input type="text" id="f_${key}" maxlength="42">`;
+  lineFieldsEl.appendChild(div);
+}
+
+const iconGridEl = document.getElementById("iconGrid");
+function renderIconGrid() {
+  iconGridEl.innerHTML = "";
+  for (const [slug, title] of ICONS) {
+    const idx = selectedIcons.indexOf(slug);
+    const chip = document.createElement("div");
+    chip.className = "icon-chip" + (idx !== -1 ? " active" : "");
+    chip.textContent = title;
+    if (idx !== -1) {
+      const n = document.createElement("span");
+      n.className = "n";
+      n.textContent = idx + 1;
+      chip.appendChild(n);
+    }
+    chip.addEventListener("click", () => {
+      const i = selectedIcons.indexOf(slug);
+      if (i !== -1) selectedIcons.splice(i, 1);
+      else if (selectedIcons.length < 12) selectedIcons.push(slug);
+      renderIconGrid();
+      update();
+    });
+    iconGridEl.appendChild(chip);
+  }
+}
+renderIconGrid();
+
+function buildQuery() {
+  const params = new URLSearchParams();
+  const user = document.getElementById("f_user").value.trim();
+  const host = document.getElementById("f_host").value.trim();
+  if (user) params.set("user", user);
+  if (host) params.set("host", host);
+  for (const [key] of LINE_FIELDS) {
+    const v = document.getElementById(`f_${key}`).value.trim();
+    if (v) params.set(key, v);
+  }
+  if (selectedIcons.length) params.set("icons", selectedIcons.join(","));
+  const bg = document.getElementById("f_bg").value;
+  const border = document.getElementById("f_border").value;
+  const accent = document.getElementById("f_accent").value;
+  const text = document.getElementById("f_text").value;
+  if (bg !== "#0d0d11") params.set("bg", bg);
+  if (border !== "#2a2a33") params.set("border", border);
+  if (accent !== "#7dd3fc") params.set("accent", accent);
+  if (text !== "#e4e4e7") params.set("text", text);
+  const speed = document.getElementById("f_speed").value;
+  if (speed && speed !== "3") params.set("speed", speed);
+  if (!document.getElementById("f_cursor").checked) params.set("cursor", "off");
+  return params;
+}
+
+let debounceTimer = null;
+function update() {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    const params = buildQuery();
+    const url = `${location.origin}/api/svg?${params.toString()}`;
+    document.getElementById("preview").src = url;
+    document.getElementById("out_url").value = url;
+    const user = document.getElementById("f_user").value.trim() || "github";
+    document.getElementById("out_md").value = `<img src="${url}" width="100%" alt="${user} neofetch profile card" />`;
+  }, 250);
+}
+
+document.querySelectorAll("input").forEach((el) => {
+  el.addEventListener("input", update);
+  el.addEventListener("change", update);
+});
+
+document.getElementById("copy_md").addEventListener("click", () => {
+  navigator.clipboard.writeText(document.getElementById("out_md").value);
+});
+document.getElementById("copy_url").addEventListener("click", () => {
+  navigator.clipboard.writeText(document.getElementById("out_url").value);
+});
+
+update();
+</script>
+</body>
+</html>
