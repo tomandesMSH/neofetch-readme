@@ -1,0 +1,9 @@
+.cache/
+.vercel/
+.verify/
+.preview.svg
+node_modules/
+__pycache__/
+*.pyc
+
+.vercel

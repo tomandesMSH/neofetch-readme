@@ -1,0 +1,10 @@
+{
+  "name": "neofetch-readme",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Live, query-parameterized neofetch-style animated SVG for GitHub profile READMEs.",
+  "scripts": {
+    "preview": "node tools/preview.js",
+    "embed-font": "node tools/embed-font.js"
+  }
+}
